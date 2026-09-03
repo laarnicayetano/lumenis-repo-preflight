@@ -19,3 +19,4 @@ jobs:
     uses: ./.github/workflows/bump-version.yml
     with:
       branch: master
+      package-dir: cli
