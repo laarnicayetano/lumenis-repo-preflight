@@ -46,6 +46,7 @@ jobs:
     uses: laarnicayetano/lumenis-repo-preflight/.github/workflows/bump-version.yml@v1
     with:
       branch: master
+      package-dir: cli   # optional, defaults to "." (repo root)
 ```
 
 This repo also consumes its own `bump-version.yml` (via

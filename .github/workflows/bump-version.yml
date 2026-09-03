@@ -22,6 +22,7 @@ name: bump-version (reusable)
 #       uses: laarnicayetano/lumenis-repo-preflight/.github/workflows/bump-version.yml@v1
 #       with:
 #         branch: master
+#         package-dir: cli   # optional, defaults to "." (repo root); wherever package.json lives
 
 on:
   workflow_call:
@@ -30,6 +31,10 @@ on:
         description: "Branch this workflow bumps and tags on merge"
         type: string
         default: "master"
+      package-dir:
+        description: "Directory containing the package.json to bump, relative to the repo root"
+        type: string
+        default: "."
 
 permissions:
   contents: write
@@ -71,12 +76,13 @@ jobs:
 
       - name: Bump version
         if: steps.level.outputs.level != 'none'
+        working-directory: ${{ inputs.package-dir }}
         run: npm version "${{ steps.level.outputs.level }}" --no-git-tag-version --allow-same-version
 
       - name: Commit, push, and tag
         if: steps.level.outputs.level != 'none'
         run: |
-          version=$(node -p "require('./package.json').version")
+          version=$(node -p "require('./${{ inputs.package-dir }}/package.json').version")
           tag="v$version"
           if git rev-parse "$tag" >/dev/null 2>&1; then
             echo "Tag $tag already exists — skipping (already bumped/tagged?)."
