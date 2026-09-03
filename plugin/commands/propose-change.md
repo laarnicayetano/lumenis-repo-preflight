@@ -87,6 +87,20 @@ to the default branch.
    genuinely ambiguous. If the repo doesn't use that workflow, skip labeling
    entirely — don't invent a convention it doesn't have.
 
+   Before attaching one, check the label actually exists (`gh label list`).
+   The workflow can't be used without `bump:none`/`patch`/`minor`/`major`
+   existing, so if none of them do yet, create all four together rather
+   than just the one needed for this PR — the next PR will need one too,
+   and a partial set that grows one-off is worse than seeding the whole
+   convention at once:
+
+   ```
+   gh label create "bump:none" --color "cfd3d7" --description "No version bump — docs/tooling only"
+   gh label create "bump:patch" --color "0e8a16" --description "Patch version bump"
+   gh label create "bump:minor" --color "fbca04" --description "Minor version bump"
+   gh label create "bump:major" --color "d73a4a" --description "Major version bump"
+   ```
+
 9. **Switch back to the default branch** once the branch is pushed and the
    PR is open:
 
