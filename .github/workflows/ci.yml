@@ -25,9 +25,12 @@ jobs:
           tool: lychee
 
       - name: Install gitleaks
-        uses: taiki-e/install-action@v2
-        with:
-          tool: gitleaks
+        run: |
+          version=$(curl -fsSL https://api.github.com/repos/gitleaks/gitleaks/releases/latest | grep -m1 '"tag_name"' | sed -E 's/.*"v([^"]+)".*/\1/')
+          curl -fsSL "https://github.com/gitleaks/gitleaks/releases/download/v${version}/gitleaks_${version}_linux_x64.tar.gz" -o gitleaks.tar.gz
+          tar -xzf gitleaks.tar.gz gitleaks
+          sudo install -m 755 gitleaks /usr/local/bin/gitleaks
+          rm gitleaks.tar.gz gitleaks
 
       - name: Check links
         run: node bin/preflight.js check-links --config ../configs/lychee.toml
