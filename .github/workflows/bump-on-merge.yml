@@ -1,0 +1,19 @@
+name: Bump version on merge
+
+# This repo consumes its own reusable bump-version.yml, the same way an
+# external repo would — via a bump:<level> label on the merged PR. Uses a
+# same-repo relative path rather than `owner/repo/...@v1`, since there's no
+# reason to round-trip through a tag reference for a workflow that already
+# lives right here.
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [master]
+
+jobs:
+  bump:
+    if: github.event.pull_request.merged == true
+    uses: ./.github/workflows/bump-version.yml
+    with:
+      branch: master
