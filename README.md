@@ -55,7 +55,6 @@ and `gh` but haven't been run end-to-end yet. See open items below.
 
 ## Open next steps
 
-- [ ] Confirm final name (currently: preflight)
 - [ ] Wire up `cli/` dependencies and test each command against a real repo
 - [ ] Register this repo as a plugin marketplace source
 - [ ] Set up `NPM_TOKEN` secret for `release-cli.yml`
