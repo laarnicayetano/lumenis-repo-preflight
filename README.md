@@ -48,6 +48,12 @@ jobs:
       branch: master
 ```
 
+This repo also consumes its own `bump-version.yml` (via
+`.github/workflows/bump-on-merge.yml`) — attach a `bump:none`/`patch`/
+`minor`/`major` label to a PR against `master` and merging it bumps
+`cli/package.json`'s version and tags the result, same as any consuming
+repo would get.
+
 ## Status
 
 Scaffold only — command implementations shell out to `lychee`, `gitleaks`,
