@@ -11,7 +11,7 @@ adapters over it, so logic isn't duplicated per surface.
 ├── cli/                    @laarnicayetano/preflight-cli — the source of truth
 ├── configs/                shared rule files (lychee, gitleaks)
 ├── .github/workflows/      CI + reusable workflow_call versions + release
-└── plugin/                 Claude Code plugin (slash commands + propose-change skill)
+└── plugin/                 Claude Code plugin (check-links, scan-secrets, propose-change skills)
 ```
 
 ## Usage
@@ -24,8 +24,11 @@ preflight check-links
 preflight scan-secrets
 ```
 
-Or install the Claude Code plugin for `/check-links`, `/scan-secrets`, and
-the `propose-change` skill (commits, opens a PR, and runs both checks first):
+Or install the Claude Code plugin for the `check-links`, `scan-secrets`, and
+`propose-change` skills. These are proactively invoked from plain language —
+no slash command to remember — e.g. "check my links," "scan for secrets,"
+or "ship this" (which runs `propose-change`: commits, opens a PR, and runs
+both checks first):
 
 ```
 claude plugin marketplace add laarnicayetano/lumenis-repo-preflight
