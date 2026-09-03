@@ -1,0 +1,10 @@
+{
+  "name": "lumenis-preflight",
+  "owner": "Lumenis",
+  "plugins": [
+    {
+      "name": "preflight",
+      "source": "./plugin"
+    }
+  ]
+}

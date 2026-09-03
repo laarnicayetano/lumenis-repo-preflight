@@ -1,0 +1,6 @@
+{
+  "name": "preflight",
+  "version": "0.1.0",
+  "description": "Interactive adapter over the @lumenis/preflight-cli: link checking, secret scanning, version bumping, PR creation.",
+  "author": "Lumenis"
+}

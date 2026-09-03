@@ -1,0 +1,91 @@
+name: bump-version (reusable)
+
+# Bump a consuming repo's version + changelog after a PR merges, based on a
+# bump:<level> label on that PR, then tag the result. CI-only — there's no
+# `preflight bump` for local/interactive use; if a developer needs to bump a
+# version by hand, `npm version` does that directly.
+#
+# The bump itself runs `npm version <level>` directly — it takes the level
+# from the label as an explicit argument, unlike changesets (which derives
+# the bump from accumulated changeset files, not an external flag). Run with
+# --no-git-tag-version since the commit/tag below is handled separately, with
+# a message that references the PR.
+#
+# Consumers call this from their own workflow, e.g.:
+#
+#   on:
+#     pull_request:
+#       types: [closed]
+#       branches: [master]
+#   jobs:
+#     bump:
+#       uses: laarnicayetano/lumenis-repo-preflight/.github/workflows/bump-version.yml@v1
+#       with:
+#         branch: master
+
+on:
+  workflow_call:
+    inputs:
+      branch:
+        description: "Branch this workflow bumps and tags on merge"
+        type: string
+        default: "master"
+
+permissions:
+  contents: write
+
+jobs:
+  bump:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Determine bump level from PR labels
+        id: level
+        env:
+          LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
+        run: |
+          level=""
+          for l in patch minor major none; do
+            if echo ",$LABELS," | grep -q ",bump:$l,"; then
+              level="$l"
+            fi
+          done
+          if [ -z "$level" ]; then
+            echo "No bump:* label found — skipping version bump."
+            level="none"
+          fi
+          echo "level=$level" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout ${{ inputs.branch }}
+        if: steps.level.outputs.level != 'none'
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.branch }}
+          fetch-depth: 0
+
+      - name: Set up Node
+        if: steps.level.outputs.level != 'none'
+        uses: actions/setup-node@v7
+        with:
+          node-version: 26
+
+      - name: Bump version
+        if: steps.level.outputs.level != 'none'
+        run: npm version "${{ steps.level.outputs.level }}" --no-git-tag-version --allow-same-version
+
+      - name: Commit, push, and tag
+        if: steps.level.outputs.level != 'none'
+        run: |
+          version=$(node -p "require('./package.json').version")
+          tag="v$version"
+          if git rev-parse "$tag" >/dev/null 2>&1; then
+            echo "Tag $tag already exists — skipping (already bumped/tagged?)."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Bump to $tag — PR #${{ github.event.pull_request.number }} (${{ steps.level.outputs.level }})"
+          git push origin "${{ inputs.branch }}"
+          git tag -a "$tag" -m "$tag — PR #${{ github.event.pull_request.number }} (${{ steps.level.outputs.level }})"
+          git push origin "$tag"

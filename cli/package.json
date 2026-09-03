@@ -1,0 +1,23 @@
+{
+  "name": "@lumenis/preflight-cli",
+  "version": "0.1.0",
+  "description": "Shared repo-workflow toolkit: markdown link checking and secret scanning.",
+  "license": "UNLICENSED",
+  "publishConfig": {
+    "access": "restricted"
+  },
+  "type": "module",
+  "bin": {
+    "preflight": "bin/preflight.js"
+  },
+  "files": [
+    "bin",
+    "src"
+  ],
+  "scripts": {
+    "test": "node --test"
+  },
+  "dependencies": {
+    "commander": "^12.1.0"
+  }
+}

@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+jobs:
+  preflight-self-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: latest
+
+      - name: Install CLI deps
+        run: npm install
+        working-directory: cli
+
+      - name: Install lychee
+        uses: taiki-e/install-action@v2
+        with:
+          tool: lychee
+
+      - name: Install gitleaks
+        uses: taiki-e/install-action@v2
+        with:
+          tool: gitleaks
+
+      - name: Check links
+        run: node bin/preflight.js check-links --config ../configs/lychee.toml
+        working-directory: cli
+
+      - name: Scan secrets
+        run: node bin/preflight.js scan-secrets --config ../configs/gitleaks.toml
+        working-directory: cli

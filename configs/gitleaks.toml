@@ -1,0 +1,30 @@
+# Shared gitleaks config for secret scanning across Lumenis repos.
+#
+# To run this on every commit locally (catches a leak before it's even
+# pushed, not just at CI/PR time), wire it into a pre-commit hook via husky:
+#
+#   npx husky init
+#   echo 'npx @lumenis/preflight-cli scan-secrets --config configs/gitleaks.toml' > .husky/pre-commit
+#
+# Or, if the repo already uses the Python pre-commit framework instead of
+# husky, add gitleaks as a hook pointing at this same config:
+#
+#   # .pre-commit-config.yaml
+#   repos:
+#     - repo: https://github.com/gitleaks/gitleaks
+#       rev: v8.18.4
+#       hooks:
+#         - id: gitleaks
+#           args: ["--config", "configs/gitleaks.toml"]
+
+title = "Lumenis shared gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Global allowlist"
+paths = [
+  '''(.*?)(jpg|gif|doc|pdf|bin|svg|socket)$''',
+  '''node_modules''',
+]

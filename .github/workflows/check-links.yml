@@ -1,0 +1,34 @@
+name: check-links
+
+# Reusable workflow: validate markdown links via `@lumenis/preflight-cli
+# check-links` (wraps lychee against configs/lychee.toml, or a config the
+# consumer supplies).
+#
+# Consumers call this from their own workflow, e.g.:
+#
+#   on:
+#     pull_request:
+#   jobs:
+#     check-links:
+#       uses: laarnicayetano/lumenis-repo-preflight/.github/workflows/check-links.yml@v1
+#       with:
+#         config: .lychee.toml   # optional, defaults to .lychee.toml
+
+on:
+  workflow_call:
+    inputs:
+      config:
+        description: "Path to lychee config, relative to the consuming repo root"
+        type: string
+        default: ".lychee.toml"
+
+jobs:
+  check-links:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install lychee
+        uses: taiki-e/install-action@v2
+        with:
+          tool: lychee
+      - run: npx @lumenis/preflight-cli check-links --config "${{ inputs.config }}"
