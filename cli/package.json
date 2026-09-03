@@ -1,10 +1,10 @@
 {
-  "name": "@lumenis/preflight-cli",
+  "name": "@laarnicayetano/preflight-cli",
   "version": "0.1.0",
   "description": "Shared repo-workflow toolkit: markdown link checking and secret scanning.",
   "license": "UNLICENSED",
   "publishConfig": {
-    "access": "restricted"
+    "access": "public"
   },
   "type": "module",
   "bin": {

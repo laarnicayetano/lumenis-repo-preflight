@@ -8,7 +8,7 @@ One CLI is the source of truth; CI and the Claude Code plugin are thin
 adapters over it, so logic isn't duplicated per surface.
 
 ```
-├── cli/                    @lumenis/preflight-cli — the source of truth
+├── cli/                    @laarnicayetano/preflight-cli — the source of truth
 ├── configs/                shared rule files (lychee, gitleaks)
 ├── .github/workflows/      CI + reusable workflow_call versions + release
 └── plugin/                 Claude Code plugin (slash commands + propose-change skill)
@@ -19,7 +19,7 @@ adapters over it, so logic isn't duplicated per surface.
 In a consuming repo:
 
 ```
-npm install -D @lumenis/preflight-cli   # or npx @lumenis/preflight-cli <cmd>
+npm install -D @laarnicayetano/preflight-cli   # or npx @laarnicayetano/preflight-cli <cmd>
 preflight check-links
 preflight scan-secrets
 ```

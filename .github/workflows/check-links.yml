@@ -1,6 +1,6 @@
 name: check-links
 
-# Reusable workflow: validate markdown links via `@lumenis/preflight-cli
+# Reusable workflow: validate markdown links via `@laarnicayetano/preflight-cli
 # check-links` (wraps lychee against configs/lychee.toml, or a config the
 # consumer supplies).
 #
@@ -31,4 +31,4 @@ jobs:
         uses: taiki-e/install-action@v2
         with:
           tool: lychee
-      - run: npx @lumenis/preflight-cli check-links --config "${{ inputs.config }}"
+      - run: npx @laarnicayetano/preflight-cli check-links --config "${{ inputs.config }}"
