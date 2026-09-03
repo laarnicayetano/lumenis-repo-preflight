@@ -1,4 +1,5 @@
 ---
+name: propose-change
 description: Open a PR for changes made in this repo, running link and secret checks first. Use when the user says "ship this", "publish this change", "release this", "open a PR", or has finished editing and wants it up for review.
 ---
 

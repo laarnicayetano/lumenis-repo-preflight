@@ -1,5 +1,6 @@
 ---
-description: Validate markdown links in this repo
+name: check-links
+description: Validate markdown links in this repo. Use when the user asks to check for broken links, validate documentation, or wants a link check before publishing.
 ---
 
 Run `npx @laarnicayetano/preflight-cli check-links` in the project root and report the
