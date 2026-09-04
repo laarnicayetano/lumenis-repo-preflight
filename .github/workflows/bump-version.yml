@@ -11,14 +11,6 @@ name: bump-version (reusable)
 # --no-git-tag-version since the commit/tag below is handled separately, with
 # a message that references the PR.
 #
-# Deliberately doesn't publish anywhere — this workflow is reusable, and
-# most consumers won't want npm (or any other) publishing baked into a
-# generic bump-and-tag step, may not even be npm packages, and may not have
-# the right secrets available. It exposes the created tag as an output so a
-# caller can do whatever publishing it wants afterward, in its own workflow
-# (a plain job in the same file, not something this workflow needs to know
-# about — see bump-on-merge.yml in this repo for the publish half).
-#
 # Consumers call this from their own workflow, e.g.:
 #
 #   on:
@@ -31,10 +23,6 @@ name: bump-version (reusable)
 #       with:
 #         branch: master
 #         package-dir: cli   # optional, defaults to "." (repo root); wherever package.json lives
-#     publish:
-#       needs: bump
-#       if: needs.bump.outputs.tag != ''
-#       # ...do whatever publishing this repo needs, using needs.bump.outputs.tag
 
 on:
   workflow_call:
