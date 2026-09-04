@@ -49,23 +49,28 @@ jobs:
     uses: laarnicayetano/lumenis-repo-preflight/.github/workflows/bump-version.yml@v1
     with:
       branch: master
-      package-dir: cli    # optional, defaults to "." (repo root)
-      publish-npm: true   # optional, defaults to false; also publishes to npm and moves the major tag
-    secrets: inherit       # only needed if publish-npm is true
+      package-dir: cli   # optional, defaults to "." (repo root)
+
+  publish:
+    needs: bump
+    if: needs.bump.outputs.tag != ''
+    # ...do whatever publishing this repo needs, using needs.bump.outputs.tag
 ```
 
-`bump-version.yml` bumps the version, commits, and tags on merge. With
-`publish-npm: true` (needs an `NPM_TOKEN` secret), it also publishes the
-bumped package to npm and re-points the moving major tag (e.g. `v1`) to the
-new release, all in the same job — nothing reacts to the tag push
-separately, since a push made by the workflow's own default token can't
-trigger another workflow anyway.
+`bump-version.yml` only bumps the version, commits, and tags on merge — it
+deliberately doesn't publish anywhere, since it's reusable and most
+consumers won't want npm (or any other) publishing baked into a generic
+bump-and-tag step. It exposes the tag it created (or an empty string, if
+`bump:none`/no label meant nothing was bumped) as an output, so a consumer
+can add its own `publish` job that runs after and does whatever publishing
+it needs.
 
-This repo also consumes its own `bump-version.yml` this way (via
-`.github/workflows/bump-on-merge.yml`) — attach a `bump:none`/`patch`/
-`minor`/`major` label to a PR against `master` and merging it bumps
-`cli/package.json`'s version, tags, and publishes it, same as any
-consuming repo that opts into `publish-npm` would get.
+This repo does exactly that for itself: `.github/workflows/bump-on-merge.yml`
+calls `bump-version.yml`, then a local `publish` job (not part of the
+reusable workflow) uses its `tag` output to publish `cli/` to npm and
+re-point the moving major tag (e.g. `v1`) to the new release. Attach a
+`bump:none`/`patch`/`minor`/`major` label to a PR against `master`, and
+merging it bumps, tags, and publishes accordingly.
 
 ## Open next steps
 
