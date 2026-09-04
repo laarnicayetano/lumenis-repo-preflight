@@ -10,7 +10,7 @@ adapters over it, so logic isn't duplicated per surface.
 ```
 ├── cli/                    @laarnicayetano/preflight-cli — the source of truth
 ├── configs/                shared rule files (lychee, gitleaks)
-├── .github/workflows/      CI + reusable workflow_call versions + release
+├── .github/workflows/      CI + reusable workflow_call versions
 └── plugin/                 Claude Code plugin (check-links, scan-secrets, propose-change skills)
 ```
 
@@ -49,19 +49,23 @@ jobs:
     uses: laarnicayetano/lumenis-repo-preflight/.github/workflows/bump-version.yml@v1
     with:
       branch: master
-      package-dir: cli   # optional, defaults to "." (repo root)
+      package-dir: cli    # optional, defaults to "." (repo root)
+      publish-npm: true   # optional, defaults to false; also publishes to npm and moves the major tag
+    secrets: inherit       # only needed if publish-npm is true
 ```
 
-This repo also consumes its own `bump-version.yml` (via
+`bump-version.yml` bumps the version, commits, and tags on merge. With
+`publish-npm: true` (needs an `NPM_TOKEN` secret), it also publishes the
+bumped package to npm and re-points the moving major tag (e.g. `v1`) to the
+new release, all in the same job — nothing reacts to the tag push
+separately, since a push made by the workflow's own default token can't
+trigger another workflow anyway.
+
+This repo also consumes its own `bump-version.yml` this way (via
 `.github/workflows/bump-on-merge.yml`) — attach a `bump:none`/`patch`/
 `minor`/`major` label to a PR against `master` and merging it bumps
-`cli/package.json`'s version and tags the result, same as any consuming
-repo would get.
-
-## Status
-
-Scaffold only — command implementations shell out to `lychee`, `gitleaks`,
-and `gh` but haven't been run end-to-end yet. See open items below.
+`cli/package.json`'s version, tags, and publishes it, same as any
+consuming repo that opts into `publish-npm` would get.
 
 ## Open next steps
 

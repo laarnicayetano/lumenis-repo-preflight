@@ -1,15 +1,23 @@
 name: bump-version (reusable)
 
 # Bump a consuming repo's version + changelog after a PR merges, based on a
-# bump:<level> label on that PR, then tag the result. CI-only — there's no
-# `preflight bump` for local/interactive use; if a developer needs to bump a
-# version by hand, `npm version` does that directly.
+# bump:<level> label on that PR, then tag, publish, and move the moving
+# major tag — all in this one job. CI-only — there's no `preflight bump`
+# for local/interactive use; if a developer needs to bump a version by
+# hand, `npm version` does that directly.
 #
 # The bump itself runs `npm version <level>` directly — it takes the level
 # from the label as an explicit argument, unlike changesets (which derives
 # the bump from accumulated changeset files, not an external flag). Run with
 # --no-git-tag-version since the commit/tag below is handled separately, with
 # a message that references the PR.
+#
+# Publish and the major-tag move used to live in a separate release-cli.yml,
+# triggered by this workflow's own tag push. That never actually fired:
+# GitHub doesn't let a push made with the default GITHUB_TOKEN trigger other
+# workflows (an anti-recursion rule), so every merge silently tagged a
+# version that was never published. Doing it all in this one job sidesteps
+# that entirely — nothing needs to react to an event that can't fire.
 #
 # Consumers call this from their own workflow, e.g.:
 #
@@ -23,6 +31,8 @@ name: bump-version (reusable)
 #       with:
 #         branch: master
 #         package-dir: cli   # optional, defaults to "." (repo root); wherever package.json lives
+#         publish-npm: true  # optional, defaults to false; needs an NPM_TOKEN secret
+#     secrets: inherit       # only needed if publish-npm is true
 
 on:
   workflow_call:
@@ -35,6 +45,10 @@ on:
         description: "Directory containing the package.json to bump, relative to the repo root"
         type: string
         default: "."
+      publish-npm:
+        description: "Publish to npm and move the major version tag after tagging. Requires an NPM_TOKEN secret."
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -73,6 +87,7 @@ jobs:
         uses: actions/setup-node@v7
         with:
           node-version: 26
+          registry-url: https://registry.npmjs.org
 
       - name: Bump version
         if: steps.level.outputs.level != 'none'
@@ -81,11 +96,13 @@ jobs:
 
       - name: Commit, push, and tag
         if: steps.level.outputs.level != 'none'
+        id: tag
         run: |
           version=$(node -p "require('./${{ inputs.package-dir }}/package.json').version")
           tag="v$version"
           if git rev-parse "$tag" >/dev/null 2>&1; then
             echo "Tag $tag already exists — skipping (already bumped/tagged?)."
+            echo "tag=" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           git config user.name "github-actions[bot]"
@@ -95,3 +112,20 @@ jobs:
           git push origin "${{ inputs.branch }}"
           git tag -a "$tag" -m "$tag — PR #${{ github.event.pull_request.number }} (${{ steps.level.outputs.level }})"
           git push origin "$tag"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+      - name: Publish to npm
+        if: steps.tag.outputs.tag != '' && inputs.publish-npm
+        working-directory: ${{ inputs.package-dir }}
+        run: |
+          npm install
+          npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Move major version tag
+        if: steps.tag.outputs.tag != '' && inputs.publish-npm
+        run: |
+          major_tag="v$(echo "${{ steps.tag.outputs.tag }}" | cut -d. -f1 | tr -d v)"
+          git tag -f "$major_tag"
+          git push -f origin "$major_tag"
