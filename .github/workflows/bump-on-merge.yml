@@ -6,19 +6,7 @@ name: Bump version on merge
 # reason to round-trip through a tag reference for a workflow that already
 # lives right here.
 #
-# The npm-publish half lives here, not in bump-version.yml itself — that
-# workflow is reusable and exported for other repos to call, most of which
-# won't want npm publishing (or may not even be npm packages). Publishing
-# is this repo's own concern, so it's a plain job in this repo-local file
-# instead of an option baked into the shared workflow.
-#
-# This also used to be a separate release-cli.yml triggered by the tag
-# push bump-version.yml makes. That never actually fired: GitHub doesn't
-# let a push made with the default GITHUB_TOKEN trigger other workflows
-# (an anti-recursion rule), so every merge silently tagged a version that
-# was never published. Consuming bump-version.yml's tag output directly in
-# a needs: job here sidesteps that entirely — nothing needs to react to an
-# event that can't fire.
+# After looking at the labels we npm publish if there is a bump label.
 
 on:
   pull_request:
