@@ -10,7 +10,7 @@ adapters over it, so logic isn't duplicated per surface.
 ```
 ├── cli/                    @laarnicayetano/preflight-cli — the source of truth
 ├── configs/                shared rule files (lychee, gitleaks)
-├── .github/workflows/      CI + reusable workflow_call versions + release
+├── .github/workflows/      CI + reusable workflow_call versions
 └── plugin/                 Claude Code plugin (check-links, scan-secrets, propose-change skills)
 ```
 
@@ -50,18 +50,27 @@ jobs:
     with:
       branch: master
       package-dir: cli   # optional, defaults to "." (repo root)
+
+  publish:
+    needs: bump
+    if: needs.bump.outputs.tag != ''
+    # ...do whatever publishing this repo needs, using needs.bump.outputs.tag
 ```
 
-This repo also consumes its own `bump-version.yml` (via
-`.github/workflows/bump-on-merge.yml`) — attach a `bump:none`/`patch`/
-`minor`/`major` label to a PR against `master` and merging it bumps
-`cli/package.json`'s version and tags the result, same as any consuming
-repo would get.
+`bump-version.yml` only bumps the version, commits, and tags on merge — it
+deliberately doesn't publish anywhere, since it's reusable and most
+consumers won't want npm (or any other) publishing baked into a generic
+bump-and-tag step. It exposes the tag it created (or an empty string, if
+`bump:none`/no label meant nothing was bumped) as an output, so a consumer
+can add its own `publish` job that runs after and does whatever publishing
+it needs.
 
-## Status
-
-Scaffold only — command implementations shell out to `lychee`, `gitleaks`,
-and `gh` but haven't been run end-to-end yet. See open items below.
+This repo does exactly that for itself: `.github/workflows/bump-on-merge.yml`
+calls `bump-version.yml`, then a local `publish` job (not part of the
+reusable workflow) uses its `tag` output to publish `cli/` to npm and
+re-point the moving major tag (e.g. `v1`) to the new release. Attach a
+`bump:none`/`patch`/`minor`/`major` label to a PR against `master`, and
+merging it bumps, tags, and publishes accordingly.
 
 ## Open next steps
 

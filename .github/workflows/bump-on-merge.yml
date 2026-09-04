@@ -5,6 +5,8 @@ name: Bump version on merge
 # same-repo relative path rather than `owner/repo/...@v1`, since there's no
 # reason to round-trip through a tag reference for a workflow that already
 # lives right here.
+#
+# After looking at the labels we npm publish if there is a bump label.
 
 on:
   pull_request:
@@ -20,3 +22,36 @@ jobs:
     with:
       branch: master
       package-dir: cli
+
+  publish:
+    needs: bump
+    if: needs.bump.outputs.tag != ''
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout master
+        uses: actions/checkout@v7
+        with:
+          ref: master
+          fetch-depth: 0
+
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 26
+          registry-url: https://registry.npmjs.org
+
+      - name: Publish to npm
+        working-directory: cli
+        run: |
+          npm install
+          npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Move major version tag
+        run: |
+          major_tag="v$(echo "${{ needs.bump.outputs.tag }}" | cut -d. -f1 | tr -d v)"
+          git tag -f "$major_tag"
+          git push -f origin "$major_tag"

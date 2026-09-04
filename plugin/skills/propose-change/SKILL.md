@@ -47,7 +47,7 @@ to the default branch.
      public materials, forward-looking dates ("launching Q3 2027", an
      embargo date), or language like "unreleased," "not yet announced,"
      "NPI," "embargo," "internal only." Weigh these in context: a future
-     date on a public roadmap page or in a discussion *about* this check
+     date on a public roadmap page or in a discussion _about_ this check
      isn't a leak; the same date attached to a specific product/feature
      that isn't public yet is.
 
@@ -115,7 +115,7 @@ to the default branch.
 
 10. **Report back in plain language**, e.g.:
     > Opened a PR: <url>. It's up for review — once someone approves and
-    > merges it, [whatever this repo's merge automation does].
+    > merges it, [whatever this repo's merge automation does]. Add the local branch name in the response.
 
 ## Notes
 

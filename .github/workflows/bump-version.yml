@@ -35,6 +35,10 @@ on:
         description: "Directory containing the package.json to bump, relative to the repo root"
         type: string
         default: "."
+    outputs:
+      tag:
+        description: "The tag that was created (e.g. v1.2.3), or empty if no bump happened"
+        value: ${{ jobs.bump.outputs.tag }}
 
 permissions:
   contents: write
@@ -43,6 +47,8 @@ jobs:
   bump:
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
     steps:
       - name: Determine bump level from PR labels
         id: level
@@ -81,11 +87,13 @@ jobs:
 
       - name: Commit, push, and tag
         if: steps.level.outputs.level != 'none'
+        id: tag
         run: |
           version=$(node -p "require('./${{ inputs.package-dir }}/package.json').version")
           tag="v$version"
           if git rev-parse "$tag" >/dev/null 2>&1; then
             echo "Tag $tag already exists — skipping (already bumped/tagged?)."
+            echo "tag=" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           git config user.name "github-actions[bot]"
@@ -95,3 +103,4 @@ jobs:
           git push origin "${{ inputs.branch }}"
           git tag -a "$tag" -m "$tag — PR #${{ github.event.pull_request.number }} (${{ steps.level.outputs.level }})"
           git push origin "$tag"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
