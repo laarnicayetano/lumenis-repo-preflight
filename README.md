@@ -31,8 +31,8 @@ or "ship this" (which runs `propose-change`: commits, opens a PR, and runs
 both checks first):
 
 ```
-claude plugin marketplace add laarnicayetano/lumenis-repo-preflight
-claude plugin install preflight
+/plugin marketplace add laarnicayetano/lumenis-repo-preflight
+/plugin install preflight@lumenis-repo-preflight
 ```
 
 ## Reusable CI workflows

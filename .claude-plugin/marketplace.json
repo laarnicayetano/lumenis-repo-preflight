@@ -1,6 +1,8 @@
 {
-  "name": "lumenis-preflight",
-  "owner": "Lumenis",
+  "name": "lumenis-repo-preflight",
+  "owner": {
+    "name": "Lumenis"
+  },
   "plugins": [
     {
       "name": "preflight",
